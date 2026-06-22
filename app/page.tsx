@@ -144,12 +144,12 @@ export default function Page() {
         <div style={gridStyle}>
           <NavLink href="/" label="Home" />
           <NavLink href="/faculties" label="Faculties" />
-          <NavLink href="/campus-events" label="Events" />
+          <NavLink href="/events" label="Events" />
           <NavLink href="/code-of-conduct" label="Code of Conduct" />
           <NavLink href="/contact" label="Contact" />
           <NavLink href="/student-portal" label="Student Portal" />
           <NavLink href="/admin-portal" label="Admin Portal" />
-          <NavLink href="/auth" label="Login / Register" />
+          <NavLink href="/login" label="Login / Register" />
         </div>
 
         {/* Footer note */}

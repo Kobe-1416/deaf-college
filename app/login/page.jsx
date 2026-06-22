@@ -270,7 +270,7 @@ function RegisterForm({ onSwitch }) {
           <p style={{ color: C.textSecondary, fontSize: 14, fontFamily: '"DM Sans", sans-serif', marginBottom: 24, lineHeight: 1.6 }}>
             Let's start with your personal information. All fields are required.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
+          <div className="two-col-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
             <Field label="First Name" name="firstName" placeholder="e.g. Thabo" value={form.firstName} onChange={set('firstName')} icon="👤" error={errors.firstName} />
             <Field label="Last Name" name="lastName" placeholder="e.g. Mokoena" value={form.lastName} onChange={set('lastName')} icon="👤" error={errors.lastName} />
           </div>
@@ -295,7 +295,7 @@ function RegisterForm({ onSwitch }) {
               fontFamily: '"DM Sans", sans-serif', letterSpacing: '0.1em',
               textTransform: 'uppercase', marginBottom: 12,
             }}>Hearing Status</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="hearing-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
                 { value: 'deaf', label: 'Deaf', icon: '🤟', desc: 'No functional hearing' },
                 { value: 'hard-of-hearing', label: 'Hard of Hearing', icon: '👂', desc: 'Partial hearing loss' },
@@ -392,7 +392,7 @@ function RegisterForm({ onSwitch }) {
       )}
 
       {/* Navigation buttons */}
-      <div style={{ display: 'flex', gap: 12, justifyContent: step > 1 ? 'space-between' : 'flex-end' }}>
+      <div className="nav-buttons" style={{ display: 'flex', gap: 12, justifyContent: step > 1 ? 'space-between' : 'flex-end' }}>
         {step > 1 && (
           <button type="button" onClick={() => setStep(s => s - 1)} style={{
             padding: '13px 28px', borderRadius: 12, border: `1.5px solid rgba(28,15,5,0.15)`,
@@ -438,13 +438,13 @@ function RegisterForm({ onSwitch }) {
 function StepIndicator({ current }) {
   const steps = ['Personal Details', 'Academic Info', 'Set Password'];
   return (
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 32 }}>
+    <div className="step-indicator" style={{ display: 'flex', alignItems: 'center', marginBottom: 32 }}>
       {steps.map((label, i) => {
         const idx = i + 1;
         const done = idx < current;
         const active = idx === current;
         return (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', flex: i < steps.length - 1 ? 1 : 'unset' }}>
+          <div className="step-item" key={label} style={{ display: 'flex', alignItems: 'center', flex: i < steps.length - 1 ? 1 : 'unset' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
               <div style={{
                 width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
@@ -466,7 +466,7 @@ function StepIndicator({ current }) {
               }}>{label}</span>
             </div>
             {i < steps.length - 1 && (
-              <div style={{
+              <div className="step-connector" style={{
                 flex: 1, height: 2, margin: '-20px 8px 0', borderRadius: 2,
                 background: done ? C.success : 'rgba(28,15,5,0.1)',
                 transition: 'background 0.3s',
@@ -575,7 +575,12 @@ function LeftPanel({ mode }) {
     { text: '"In Sign Language, our hands are our voice and movement is our expression."', author: 'National Deaf Technincal And Vocational Academy Ethos' },
     { text: '"Ubuntu: I am because we are. Every National Deaf Technincal And Vocational student belongs to something greater."', author: 'Campus Community' },
   ];
-  const [qIndex] = useState(() => Math.floor(Math.random() * quotes.length));
+  // Keep the initial server and client render identical to avoid hydration mismatches.
+  const [qIndex, setQIndex] = useState(0);
+
+  useEffect(() => {
+    setQIndex(Math.floor(Math.random() * quotes.length));
+  }, []);
 
   return (
     <div style={{
@@ -645,7 +650,7 @@ function LeftPanel({ mode }) {
         </div>
 
         {/* Feature pills */}
-        <div style={{
+        <div className="feature-pills" style={{
           display: 'flex', flexDirection: 'column', gap: 12, marginTop: 36,
           opacity: loaded ? 1 : 0, transition: 'opacity 0.7s ease 0.3s',
         }}>
@@ -720,11 +725,28 @@ export default function AuthPage() {
         @media (max-width: 860px) {
           .auth-grid { grid-template-columns: 1fr !important; }
           .left-panel { display: none !important; }
-          .auth-wrapper { min-height: 100vh !important; }
+          .auth-wrapper { min-height: 100vh !important; padding: 18px 16px 36px !important; }
+          .auth-card { padding: 28px 20px !important; border-radius: 20px !important; }
+          .two-col-grid { grid-template-columns: 1fr !important; gap: 0 !important; }
+          .hearing-grid { grid-template-columns: 1fr !important; }
+          .nav-buttons { flex-direction: column-reverse !important; align-items: stretch !important; }
+          .nav-buttons > button { width: 100% !important; }
+          .step-indicator { flex-wrap: wrap !important; gap: 12px !important; }
+          .step-indicator .step-item { flex: 1 1 calc(50% - 6px) !important; min-width: 130px !important; }
+          .step-indicator .step-connector { display: none !important; }
+          .feature-pills { margin-top: 24px !important; }
+        }
+
+        @media (max-width: 520px) {
+          .auth-wrapper { padding: 14px 12px 28px !important; }
+          .auth-card { padding: 22px 16px !important; border-radius: 18px !important; }
+          .step-indicator .step-item { flex: 1 1 100% !important; min-width: 0 !important; }
+          .step-indicator .step-item span { white-space: normal !important; text-align: center; line-height: 1.35; }
+          .step-indicator { justify-content: center !important; }
         }
       `}</style>
 
-      <div style={{ minHeight: '150vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }} className="auth-grid">
+      <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }} className="auth-grid">
 
         {/* ── Left decorative panel ── */}
         <div className="left-panel" style={{ position: 'sticky', top: 0, height: '100%',  }}>
@@ -758,14 +780,13 @@ export default function AuthPage() {
           </div>
 
           {/* Form card */}
-          <div style={{
+          <div className="auth-card" style={{
             width: '100%', maxWidth: 480,
             background: '#fff', borderRadius: 24,
             boxShadow: '0 8px 48px rgba(28,15,5,0.1)',
             border: '1px solid rgba(28,15,5,0.07)',
             padding: '40px 44px',
             animation: 'slideLeft 0.4s ease',
-             
           }} key={mode}>
 
             {/* Mode toggle tabs */}
