@@ -25,6 +25,7 @@ const C = {
   infoLight: '#E8F1F9',
   purple: '#7B5EA7',
   purpleLight: '#F0EBF8',
+  rust: '#A65B2B',
 
   bg: '#FEFEFE',
 };
@@ -132,19 +133,24 @@ const Card = ({ children, style = {} }) => (
     background: '#fff', borderRadius: 18,
     border: `1px solid ${C.border}`,
     boxShadow: '0 2px 16px rgba(28,15,5,0.06)',
+    minWidth: 0,
     ...style,
   }}>{children}</div>
 );
 
-const SectionTitle = ({ icon, title, sub }) => (
-  <div style={{ marginBottom: 24 }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: sub ? 6 : 0 }}>
-      <span style={{ fontSize: 22 }}>{icon}</span>
-      <h2 style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 22, fontWeight: 900, color:  C.navyDark, margin: 0 }}>{title}</h2>
+const SectionTitle = ({ icon, title, sub }) => {
+  const isMobile = useIsMobile();
+
+  return (
+    <div style={{ marginBottom: isMobile ? 18 : 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: sub ? 6 : 0, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: isMobile ? 20 : 22 }}>{icon}</span>
+        <h2 style={{ fontFamily: '"DM Sans", sans-serif', fontSize: isMobile ? 20 : 22, fontWeight: 900, color:  C.navyDark, margin: 0 }}>{title}</h2>
+      </div>
+      {sub && <p style={{ color:  C.textSecondary, fontSize: 14, fontFamily: '"DM Sans", sans-serif', margin: 0, paddingLeft: isMobile ? 0 : 32, lineHeight: 1.5 }}>{sub}</p>}
     </div>
-    {sub && <p style={{ color:  C.textSecondary, fontSize: 14, fontFamily: '"DM Sans", sans-serif', margin: 0, paddingLeft: 32 }}>{sub}</p>}
-  </div>
-);
+  );
+};
 
 function ProgressBar({ value, color }) {
   return (
@@ -154,23 +160,37 @@ function ProgressBar({ value, color }) {
   );
 }
 
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= breakpoint);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 // ─── Tab views ────────────────────────────────────────────────────────────────
 
 function MyCourses() {
+  const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(null);
   return (
     <div>
       <SectionTitle icon="📚" title="My Courses" sub="Semester 2 · 2024 — 5 enrolled modules · 64 credits" />
 
       {/* Summary strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
         {[
           { label: 'Enrolled', value: '5', color:  C.info, icon: '📋' },
           { label: 'In Progress', value: '4', color:  C.accent, icon: '🔄' },
           { label: 'Complete', value: '1', color:  C.success, icon: '✅' },
           { label: 'Avg Grade', value: '77%', color:  C.primary, icon: '🎯' },
         ].map(s => (
-          <Card key={s.label} style={{ padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Card key={s.label} style={{ padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, background: `${s.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>{s.icon}</div>
             <div>
               <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 22, fontWeight: 900, color: s.color }}>{s.value}</div>
@@ -184,7 +204,7 @@ function MyCourses() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {COURSES.map((c, i) => (
           <Card key={c.code} style={{ overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', cursor: 'pointer', gap: 16 }}
+            <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', padding: isMobile ? '18px 16px' : '20px 24px', cursor: 'pointer', gap: 16, flexWrap: isMobile ? 'wrap' : 'nowrap' }}
               onClick={() => setExpanded(expanded === i ? null : i)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, minWidth: 0 }}>
                 <div style={{ width: 46, height: 46, borderRadius: 12, background: `${c.color}18`, border: `1px solid ${c.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -202,11 +222,11 @@ function MyCourses() {
                   </div>
                 </div>
               </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ textAlign: isMobile ? 'left' : 'right', flexShrink: 0, width: isMobile ? '100%' : 'auto' }}>
                 <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 20, fontWeight: 900, color: c.color }}>{c.grade}</div>
                 <div style={{ fontSize: 11, color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif' }}>{c.credits} credits</div>
               </div>
-              <div style={{ width: 30, height: 30, borderRadius: '50%', background: `${c.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'transform 0.3s', transform: expanded === i ? 'rotate(180deg)' : 'none' }}>
+              <div style={{ width: 30, height: 30, borderRadius: '50%', background: `${c.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'transform 0.3s', transform: expanded === i ? 'rotate(180deg)' : 'none', alignSelf: isMobile ? 'flex-end' : 'auto' }}>
                 <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 4L5.5 7.5L9 4" stroke={c.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
             </div>
@@ -223,7 +243,7 @@ function MyCourses() {
             {/* Expanded panel */}
             {expanded === i && (
               <div style={{ borderTop: `1px solid ${C.border}`, padding: '20px 24px', background:  C.white, animation: 'fadeIn 0.25s ease' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 14, marginBottom: 16 }}>
                   {[
                     { label: 'Assignments', value: '4 / 5 submitted' },
                     { label: 'Tests', value: '2 / 3 written' },
@@ -235,7 +255,7 @@ function MyCourses() {
                     </div>
                   ))}
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
                   <button style={{ padding: '9px 20px', borderRadius: 10, border: 'none', cursor: 'pointer', background: c.color, color: '#fff', fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 13 }}>Course Materials</button>
                   <button style={{ padding: '9px 20px', borderRadius: 10, border: `1px solid ${C.border}`, cursor: 'pointer', background: '#fff', color:  C.navyDark, fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 13 }}>Assignments</button>
                   <button style={{ padding: '9px 20px', borderRadius: 10, border: `1px solid ${C.border}`, cursor: 'pointer', background: '#fff', color:  C.navyDark, fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 13 }}>Results Breakdown</button>
@@ -250,6 +270,7 @@ function MyCourses() {
 }
 
 function Timetable() {
+  const isMobile = useIsMobile();
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const today = days[new Date().getDay() - 1] || 'Mon';
   const [activeDay, setActiveDay] = useState(today);
@@ -259,10 +280,10 @@ function Timetable() {
       <SectionTitle icon="🗓️" title="My Timetable" sub="Current semester weekly schedule — all sessions have SASL support" />
 
       {/* Day selector */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 28, background: '#fff', borderRadius: 16, padding: 6, border: `1px solid ${C.border}`, width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 28, background: '#fff', borderRadius: 16, padding: 6, border: `1px solid ${C.border}`, width: isMobile ? '100%' : 'fit-content', flexWrap: 'wrap' }}>
         {days.map(d => (
           <button key={d} onClick={() => setActiveDay(d)} style={{
-            padding: '10px 22px', borderRadius: 11, border: 'none', cursor: 'pointer',
+            padding: '10px 22px', borderRadius: 11, border: 'none', cursor: 'pointer', minWidth: isMobile ? 'calc(50% - 4px)' : 'auto',
             background: activeDay === d ? `linear-gradient(135deg, ${ C.accent}, ${ C.primary})` : 'transparent',
             color: activeDay === d ? '#fff' :  C.textSecondary,
             fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 14,
@@ -278,17 +299,17 @@ function Timetable() {
       {/* Sessions for active day */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 36 }}>
         {(TIMETABLE[activeDay] || []).length === 0 && (
-          <Card style={{ padding: '40px', textAlign: 'center', color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif' }}>
+          <Card style={{ padding: isMobile ? '24px' : '40px', textAlign: 'center', color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif' }}>
             No classes scheduled for {activeDay}. 🎉
           </Card>
         )}
         {(TIMETABLE[activeDay] || []).map((s, i) => (
-          <Card key={i} style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 20, borderLeft: `4px solid ${s.color}` }}>
-            <div style={{ textAlign: 'center', minWidth: 72 }}>
+          <Card key={i} style={{ padding: isMobile ? '16px' : '20px 24px', display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: 20, borderLeft: `4px solid ${s.color}`, flexDirection: isMobile ? 'column' : 'row' }}>
+            <div style={{ textAlign: isMobile ? 'left' : 'center', minWidth: 72 }}>
               <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 15, fontWeight: 900, color: s.color }}>{s.time.split('–')[0]}</div>
               <div style={{ fontSize: 11, color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif' }}>–{s.time.split('–')[1]}</div>
             </div>
-            <div style={{ width: 1, height: 40, background: C.border }} />
+            <div style={{ width: isMobile ? '100%' : 1, height: isMobile ? 1 : 40, background: C.border }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, color:  C.navyDark, fontSize: 16 }}>{s.name}</div>
               <div style={{ fontSize: 13, color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif', marginTop: 3 }}>{s.code} · {s.room}</div>
@@ -300,7 +321,7 @@ function Timetable() {
 
       {/* Full week compact grid */}
       <SectionTitle icon="📅" title="Full Week Overview" />
-      <Card style={{ padding: '20px 24px', overflowX: 'auto' }}>
+      <Card style={{ padding: isMobile ? '16px' : '20px 24px', overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -334,6 +355,7 @@ function Timetable() {
 }
 
 function Registration() {
+  const isMobile = useIsMobile();
   const [selected, setSelected] = useState([]);
   const toggle = (code) => setSelected(s => s.includes(code) ? s.filter(c => c !== code) : [...s, code]);
 
@@ -342,7 +364,7 @@ function Registration() {
       <SectionTitle icon="📝" title="Module Registration" sub="2025 Academic Year — 3rd Year enrolment window is open" />
 
       {/* Status banner */}
-      <div style={{ background: `${ C.success}12`, border: `1px solid ${ C.success}30`, borderRadius: 16, padding: '16px 20px', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ background: `${ C.success}12`, border: `1px solid ${ C.success}30`, borderRadius: 16, padding: isMobile ? '14px 16px' : '16px 20px', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 14, flexDirection: isMobile ? 'column' : 'row' }}>
         <span style={{ fontSize: 28 }}>✅</span>
         <div>
           <div style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, color:  C.success, fontSize: 15 }}>Registration window is open — closes 31 January 2025</div>
@@ -355,7 +377,7 @@ function Registration() {
         <h3 style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 17, fontWeight: 800, color:  C.navyDark, margin: '0 0 14px' }}>Currently Registered — Semester 2 · 2024</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {COURSES.map(c => (
-            <div key={c.code} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${C.border}` }}>
+            <div key={c.code} style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: 14, padding: '14px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${C.border}`, flexDirection: isMobile ? 'column' : 'row' }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.status === 'Complete' ?  C.success :  C.accent, flexShrink: 0 }} />
               <span style={{ fontSize: 12, fontWeight: 800, color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif', width: 56 }}>{c.code}</span>
               <span style={{ flex: 1, fontSize: 14, color:  C.navyDark, fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>{c.name}</span>
@@ -373,8 +395,9 @@ function Registration() {
           const isSelected = selected.includes(m.code);
           return (
             <div key={m.code} onClick={() => m.available && toggle(m.code)} style={{
-              display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px',
+              display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: 14, padding: '16px 18px',
               background: isSelected ? `${ C.primary}0A` : '#fff',
+              flexDirection: isMobile ? 'column' : 'row',
               borderRadius: 12, border: `1.5px solid ${isSelected ?  C.primary : m.available ? C.border : 'rgba(28,15,5,0.05)'}`,
               cursor: m.available ? 'pointer' : 'not-allowed',
               opacity: m.available ? 1 : 0.5,
@@ -394,7 +417,7 @@ function Registration() {
       </div>
 
       {selected.length > 0 && (
-        <div style={{ background:  C.navyDark, borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ background:  C.navyDark, borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexDirection: isMobile ? 'column' : 'row' }}>
           <div>
             <div style={{ color: '#fff', fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 15 }}>{selected.length} module{selected.length > 1 ? 's' : ''} selected</div>
             <div style={{ color: 'rgba(255,255,255,0.5)', fontFamily: '"DM Sans", sans-serif', fontSize: 13, marginTop: 2 }}>Review selection before submitting to your academic advisor</div>
@@ -409,6 +432,7 @@ function Registration() {
 }
 
 function Payments() {
+  const isMobile = useIsMobile();
   const [showUpload, setShowUpload] = useState(false);
 
   return (
@@ -416,7 +440,7 @@ function Payments() {
       <SectionTitle icon="💳" title="Fees & Payments" sub="2024 academic year financial overview" />
 
       {/* Balance cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 14, marginBottom: 28 }}>
         {[
           { label: 'Outstanding Balance', value: 'R 14 600.00', color:  C.danger, icon: '⚠️', sub: 'Due 15 Jul 2024' },
           { label: 'Total Paid (2024)', value: 'R 16 250.00', color:  C.success, icon: '✅', sub: 'Including bursary credit' },
@@ -435,7 +459,7 @@ function Payments() {
 
       {/* Upload proof */}
       <Card style={{ padding: '20px 24px', marginBottom: 28, border: `1.5px dashed ${ C.accent}60`, background: `${ C.accent}05` }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, flexDirection: isMobile ? 'column' : 'row' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <span style={{ fontSize: 32 }}>📤</span>
             <div>
@@ -448,8 +472,8 @@ function Payments() {
           </button>
         </div>
         {showUpload && (
-          <div style={{ marginTop: 20, borderTop: `1px solid ${C.border}`, paddingTop: 20, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ marginTop: 20, borderTop: `1px solid ${C.border}`, paddingTop: 20, display: 'flex', gap: 14, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Payment Reference / Invoice</label>
               <select style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: `1px solid ${C.border}`, fontFamily: '"DM Sans", sans-serif', fontSize: 14, background: '#fff', color:  C.navyDark }}>
                 <option>INV-2024-004 · Tuition Fee Semester 2</option>
@@ -503,6 +527,7 @@ function Payments() {
 }
 
 function Clubs() {
+  const isMobile = useIsMobile();
   const [filter, setFilter] = useState('All');
   const cats = ['All', 'Academic', 'Sports', 'Cultural', 'Governance', 'Recreation', 'Business'];
   const filtered = filter === 'All' ? CLUBS : CLUBS.filter(c => c.category === filter);
@@ -521,11 +546,11 @@ function Clubs() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 16 }}>
         {filtered.map(club => (
           <Card key={club.name} style={{ padding: '22px 24px', borderTop: `3px solid ${club.color}` }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ width: 48, height: 48, borderRadius: 14, background: `${club.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>{club.icon}</div>
                 <div>
                   <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 16, fontWeight: 800, color:  C.navyDark }}>{club.name}</div>
@@ -550,12 +575,13 @@ function Clubs() {
 }
 
 function Parking() {
+  const isMobile = useIsMobile();
   return (
     <div>
       <SectionTitle icon="🚗" title="Parking" sub="Manage your campus parking permit and bay allocation" />
 
       {/* Permit status */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 14, marginBottom: 28 }}>
         {[
           { label: 'Permit Status', value: 'Active', color:  C.success, icon: '✅', sub: 'Valid until 31 Dec 2024' },
           { label: 'Bay Allocation', value: 'Bay 3B', color:  C.info, icon: '🅿️', sub: 'Parking Lot C · North Campus' },
@@ -583,7 +609,7 @@ function Parking() {
       </Card>
 
       {/* Rules & actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
         <Card style={{ padding: '20px 22px' }}>
           <h4 style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 16, fontWeight: 800, color:  C.navyDark, margin: '0 0 14px' }}>📋 Parking Rules</h4>
           {['Permit must be displayed on the dashboard at all times.', 'Parking in unmarked bays results in a R 200 fine.', 'Gates close at 22:00 — after-hours access via security.', 'Report incidents to Campus Security: 011 000 0001.'].map((r, i) => (
@@ -610,6 +636,7 @@ function Parking() {
 }
 
 function MyDetails() {
+  const isMobile = useIsMobile();
   const [editing, setEditing] = useState(false);
   const fields = [
     { label: 'Full Name', value: STUDENT.name, icon: '👤', editable: false },
@@ -628,10 +655,10 @@ function MyDetails() {
     <div>
       <SectionTitle icon="👤" title="My Details" sub="Your personal and academic profile" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 2fr', gap: 24 }}>
         {/* Avatar card */}
         <div>
-          <Card style={{ padding: '28px', textAlign: 'center', marginBottom: 16 }}>
+          <Card style={{ padding: '28px', textAlign: 'center', marginBottom: 16, minWidth: 0 }}>
             <div style={{ width: 80, height: 80, borderRadius: '50%', background: `linear-gradient(135deg, ${ C.accent}, ${ C.primary})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"DM Sans", sans-serif', fontWeight: 900, fontSize: 28, color: '#fff', margin: '0 auto 16px' }}>
               {STUDENT.initials}
             </div>
@@ -657,7 +684,7 @@ function MyDetails() {
 
         {/* Fields */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: 16, flexDirection: isMobile ? 'column' : 'row', gap: 12 }}>
             <h3 style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 17, fontWeight: 800, color:  C.navyDark, margin: 0 }}>Personal Information</h3>
             <button onClick={() => setEditing(e => !e)} style={{ padding: '8px 20px', borderRadius: 10, border: `1px solid ${editing ?  C.primary : C.border}`, background: editing ?  C.primary : '#fff', color: editing ? '#fff' :  C.textSecondary, fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
               {editing ? '💾 Save Changes' : '✏️ Edit'}
@@ -665,7 +692,7 @@ function MyDetails() {
           </div>
           <Card>
             {fields.map((f, i) => (
-              <div key={f.label} style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '14px 20px', borderBottom: i < fields.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+              <div key={f.label} style={{ display: 'flex', gap: 16, alignItems: isMobile ? 'flex-start' : 'center', padding: '14px 20px', borderBottom: i < fields.length - 1 ? `1px solid ${C.border}` : 'none', flexDirection: isMobile ? 'column' : 'row' }}>
                 <span style={{ fontSize: 20, flexShrink: 0, width: 28, textAlign: 'center' }}>{f.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 11, color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>{f.label}</div>
@@ -678,7 +705,7 @@ function MyDetails() {
               </div>
             ))}
           </Card>
-          <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
+          <div style={{ marginTop: 14, display: 'flex', gap: 10, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
             <button style={{ padding: '10px 20px', borderRadius: 10, border: `1px solid ${C.border}`, background: '#fff', color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>📄 Download Student Card</button>
             <button style={{ padding: '10px 20px', borderRadius: 10, border: `1px solid ${C.border}`, background: '#fff', color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>📑 Request Proof of Enrolment</button>
           </div>
@@ -689,6 +716,7 @@ function MyDetails() {
 }
 
 function Communications() {
+  const isMobile = useIsMobile();
   const [selected, setSelected] = useState(0);
   const [msgs, setMsgs] = useState(COMMS);
 
@@ -699,10 +727,10 @@ function Communications() {
     <div>
       <SectionTitle icon="📬" title="Communications" sub={`${unread} unread message${unread !== 1 ? 's' : ''}`} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 20, height: 560 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.6fr', gap: 20, height: isMobile ? 'auto' : 560 }}>
         {/* Message list */}
         <Card style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', gap: 8 }}>
+          <div style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {['All', 'Unread', 'Important'].map(f => (
               <button key={f} style={{ padding: '5px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', background: f === 'All' ?  C.navyDark : 'transparent', color: f === 'All' ? '#fff' :  C.textSecondary, fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 12 }}>{f}</button>
             ))}
@@ -730,7 +758,7 @@ function Communications() {
         </Card>
 
         {/* Message detail */}
-        <Card style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column' }}>
+        <Card style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           {msgs[selected] ? (
             <>
               <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: `1px solid ${C.border}` }}>
@@ -747,7 +775,7 @@ function Communications() {
                 </div>
               </div>
               <p style={{ color:  C.textSecondary, fontSize: 15, fontFamily: '"DM Sans", sans-serif', lineHeight: 1.8, flex: 1 }}>{msgs[selected].body}</p>
-              <div style={{ display: 'flex', gap: 10, marginTop: 20, paddingTop: 16, borderTop: `1px solid ${C.border}` }}>
+              <div style={{ display: 'flex', gap: 10, marginTop: 20, paddingTop: 16, borderTop: `1px solid ${C.border}`, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
                 <button style={{ padding: '9px 20px', borderRadius: 10, border: 'none', cursor: 'pointer', background: `linear-gradient(135deg, ${ C.accent}, ${ C.primary})`, color: '#fff', fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 13 }}>Reply</button>
                 <button style={{ padding: '9px 20px', borderRadius: 10, border: `1px solid ${C.border}`, cursor: 'pointer', background: '#fff', color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 13 }}>Archive</button>
                 <button style={{ padding: '9px 20px', borderRadius: 10, border: `1px solid ${C.border}`, cursor: 'pointer', background: '#fff', color:  C.textSecondary, fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 13 }}>🤟 Request SASL Response</button>
@@ -778,14 +806,15 @@ const TABS = [
 ];
 
 function Sidebar({ active, onChange }) {
+  const isMobile = useIsMobile();
   return (
     <aside style={{
-      width: 240, background:  C.navyDark, height: '100vh',
-      position: 'sticky', top: 0, display: 'flex', flexDirection: 'column',
+      width: isMobile ? '100%' : 240, background:  C.navyDark, height: isMobile ? 'auto' : '100vh',
+      position: isMobile ? 'relative' : 'sticky', top: 0, display: 'flex', flexDirection: 'column',
       flexShrink: 0, overflowY: 'auto',
     }}>
       {/* Logo */}
-      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+      <div style={{ padding: isMobile ? '18px 16px 16px' : '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 0 }}>
           <div style={{ width: 38, height: 38, borderRadius: 10, background: `linear-gradient(135deg, ${ C.accent}, ${ C.primary})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"DM Sans", sans-serif', fontWeight: 900, color: '#fff', fontSize: 16, flexShrink: 0 }}>SA</div>
           <div>
@@ -807,17 +836,17 @@ function Sidebar({ active, onChange }) {
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: '12px 10px' }}>
+      <nav style={{ flex: 1, padding: '12px 10px', display: isMobile ? 'grid' : 'block', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'none', gap: isMobile ? 8 : 0 }}>
         {TABS.map(tab => (
           <button key={tab.id} onClick={() => onChange(tab.id)} style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 12px', borderRadius: 10, border: 'none', cursor: 'pointer',
             background: active === tab.id ? `linear-gradient(135deg, ${ C.accent}22, ${ C.primary}22)` : 'transparent',
             borderLeft: active === tab.id ? `3px solid ${ C.accent}` : '3px solid transparent',
-            textAlign: 'left', marginBottom: 2, transition: 'background 0.15s',
+            textAlign: 'left', marginBottom: 2, transition: 'background 0.15s', minWidth: 0,
           }}>
             <span style={{ fontSize: 18, flexShrink: 0 }}>{tab.icon}</span>
-            <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 13.5, fontWeight: active === tab.id ? 700 : 500, color: active === tab.id ? '#fff' : 'rgba(255,255,255,0.55)', flex: 1 }}>{tab.label}</span>
+            <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 13.5, fontWeight: active === tab.id ? 700 : 500, color: active === tab.id ? '#fff' : 'rgba(255,255,255,0.55)', flex: 1, minWidth: 0, whiteSpace: 'normal', lineHeight: 1.2 }}>{tab.label}</span>
             {tab.badge && (
               <span style={{ background:  C.danger, color: '#fff', fontSize: 10, fontWeight: 800, borderRadius: 100, padding: '1px 7px', fontFamily: '"DM Sans", sans-serif' }}>{tab.badge}</span>
             )}
@@ -846,9 +875,10 @@ function Sidebar({ active, onChange }) {
 
 // ─── Top bar ──────────────────────────────────────────────────────────────────
 function TopBar({ tab }) {
+  const isMobile = useIsMobile();
   const current = TABS.find(t => t.id === tab);
   return (
-    <div style={{ background: '#fff', borderBottom: `1px solid ${C.border}`, padding: '0 32px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+    <div style={{ background: '#fff', borderBottom: `1px solid ${C.border}`, padding: isMobile ? '12px 16px' : '0 32px', height: isMobile ? 'auto' : 64, display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', flexShrink: 0, flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 10 : 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ fontSize: 22 }}>{current?.icon}</span>
         <h1 style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 20, fontWeight: 900, color:  C.navyDark, margin: 0 }}>{current?.label}</h1>
@@ -867,6 +897,7 @@ function TopBar({ tab }) {
 
 // ─── Page root ─────────────────────────────────────────────────────────────────
 export default function StudentPortal() {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState('courses');
 
   const renderTab = () => {
@@ -889,7 +920,7 @@ export default function StudentPortal() {
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=DM+Sans:wght@400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { height: 100%; }
-        body { background: ${C.bg}; height: 100%; }
+        body { background: ${C.bg}; min-height: 100%; overflow-x: hidden; }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(6px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -901,12 +932,12 @@ export default function StudentPortal() {
         a:focus-visible      { outline: 2px solid ${ C.accent}; outline-offset: 2px; }
       `}</style>
 
-      <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: '100vh', height: isMobile ? 'auto' : '100vh', overflow: isMobile ? 'visible' : 'hidden' }}>
         <Sidebar active={activeTab} onChange={setActiveTab} />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           <TopBar tab={activeTab} />
-          <main style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto', animation: 'fadeIn 0.3s ease' }} key={activeTab}>
+          <main style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '32px', minWidth: 0 }}>
+            <div style={{ maxWidth: 1100, margin: '0 auto', animation: 'fadeIn 0.3s ease', minWidth: 0 }} key={activeTab}>
               {renderTab()}
             </div>
           </main>
