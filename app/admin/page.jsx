@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // ─── Tokens ──────────────────────────────────────────────────────────────────
 const C = {
@@ -542,6 +542,23 @@ const TABS = [
 export default function AdminPortal() {
   const [tab, setTab] = useState('dashboard');
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+
+    checkScreen();
+
+    window.addEventListener('resize', checkScreen);
+
+    return () => window.removeEventListener('resize', checkScreen);
+  }, []);
+
+  if (!isDesktop) {
+    return null;
+  }
   const renderTab = () => {
     switch (tab) {
       case 'dashboard':    return <Dashboard />;

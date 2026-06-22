@@ -148,7 +148,7 @@ export default function Page() {
           <NavLink href="/code-of-conduct" label="Code of Conduct" />
           <NavLink href="/contact" label="Contact" />
           <NavLink href="/student-portal" label="Student Portal" />
-          <NavLink href="/admin-portal" label="Admin Portal" />
+          <NavLink href="/admin" label="Admin Portal" />
           <NavLink href="/login" label="Login / Register" />
         </div>
 
