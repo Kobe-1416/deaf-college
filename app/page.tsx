@@ -127,13 +127,13 @@ export default function Page() {
     <main style={mainStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        Sikhuluma Academy
+        NDTVA
       </div>
 
       {/* Content */}
       <div style={contentStyle}>
         <h1 style={h1Style}>
-          Sikhuluma Academy
+          NDTVA
         </h1>
 
         <p style={paragraphStyle}>
@@ -154,7 +154,7 @@ export default function Page() {
 
         {/* Footer note */}
         <div style={footerStyle}>
-          <p>Welcome to Sikhuluma Academy</p>
+          <p>Welcome to NDTVA</p>
           <p style={footerParagraphStyle}>
             Select a section above to explore
           </p>
